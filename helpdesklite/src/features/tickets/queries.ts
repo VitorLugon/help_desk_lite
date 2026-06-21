@@ -62,6 +62,8 @@ export async function getTicketForUser(user: CurrentUser, ticketId: string) {
     },
     select: {
       id: true,
+      requesterId: true,
+      assigneeId: true,
       title: true,
       description: true,
       status: true,
@@ -96,8 +98,37 @@ export async function getTicketForUser(user: CurrentUser, ticketId: string) {
           },
         },
       },
+      statusHistory: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          fromStatus: true,
+          toStatus: true,
+          createdAt: true,
+          changedBy: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
   return ticket;
+}
+
+export async function listActiveTechnicians() {
+  return prisma.user.findMany({
+    where: {
+      role: "TECHNICIAN",
+      status: "ACTIVE",
+    },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
 }

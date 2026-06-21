@@ -1,7 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  canAssignTicket,
+  canChangeTicketStatus,
+  canCommentOnTicket,
+} from "@/features/tickets/authorization";
 import { priorityLabels, statusLabels } from "@/features/tickets/labels";
-import { getTicketForUser } from "@/features/tickets/queries";
+import {
+  getTicketForUser,
+  listActiveTechnicians,
+} from "@/features/tickets/queries";
+import { TicketAssigneeForm } from "@/features/tickets/TicketAssigneeForm";
+import { TicketCommentForm } from "@/features/tickets/TicketCommentForm";
+import { TicketStatusForm } from "@/features/tickets/TicketStatusForm";
 import { requireCurrentUser } from "@/server/auth/current-user";
 
 type TicketDetailPageProps = {
@@ -31,8 +42,13 @@ export default async function TicketDetailPage({
     notFound();
   }
 
+  const userCanComment = canCommentOnTicket(currentUser, ticket);
+  const userCanChangeStatus = canChangeTicketStatus(currentUser, ticket);
+  const userCanAssign = canAssignTicket(currentUser);
+  const technicians = userCanAssign ? await listActiveTechnicians() : [];
+
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8 sm:px-8 lg:px-10">
+    <main className="mx-auto w-full max-w-5xl px-6 py-8 sm:px-8 lg:px-10">
       <Link className="text-sm font-medium text-cyan-700" href="/tickets">
         Voltar para chamados
       </Link>
@@ -59,39 +75,44 @@ export default async function TicketDetailPage({
           {ticket.description}
         </p>
 
-        <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-6 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Categoria
-            </dt>
-            <dd className="mt-1 text-sm text-slate-800">{ticket.category}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Solicitante
-            </dt>
-            <dd className="mt-1 text-sm text-slate-800">
-              {ticket.requester.name}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Responsável
-            </dt>
-            <dd className="mt-1 text-sm text-slate-800">
-              {ticket.assignee?.name ?? "Sem técnico"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Criado em
-            </dt>
-            <dd className="mt-1 text-sm text-slate-800">
-              {formatDateTime(ticket.createdAt)}
-            </dd>
-          </div>
+        <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoItem label="Categoria" value={ticket.category} />
+          <InfoItem label="Solicitante" value={ticket.requester.name} />
+          <InfoItem
+            label="Responsável"
+            value={ticket.assignee?.name ?? "Sem técnico"}
+          />
+          <InfoItem label="Criado em" value={formatDateTime(ticket.createdAt)} />
+          <InfoItem
+            label="Atualizado em"
+            value={formatDateTime(ticket.updatedAt)}
+          />
+          <InfoItem
+            label="Resolvido em"
+            value={ticket.resolvedAt ? formatDateTime(ticket.resolvedAt) : "-"}
+          />
         </dl>
       </section>
+
+      {(userCanChangeStatus || userCanAssign) && (
+        <section className="mt-6 grid gap-4 lg:grid-cols-2">
+          {userCanChangeStatus ? (
+            <TicketStatusForm
+              currentStatus={ticket.status}
+              currentUserRole={currentUser.role}
+              ticketId={ticket.id}
+            />
+          ) : null}
+
+          {userCanAssign ? (
+            <TicketAssigneeForm
+              currentAssigneeId={ticket.assigneeId}
+              technicians={technicians}
+              ticketId={ticket.id}
+            />
+          ) : null}
+        </section>
+      )}
 
       <section className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-950">Comentários</h2>
@@ -111,7 +132,57 @@ export default async function TicketDetailPage({
             Este chamado ainda não possui comentários.
           </p>
         )}
+
+        {userCanComment ? (
+          <TicketCommentForm ticketId={ticket.id} />
+        ) : (
+          <p className="mt-5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+            Você não pode comentar neste chamado no status atual.
+          </p>
+        )}
+      </section>
+
+      <section className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-950">
+          Histórico de status
+        </h2>
+        {ticket.statusHistory.length > 0 ? (
+          <ul className="mt-4 space-y-3">
+            {ticket.statusHistory.map((history) => (
+              <li
+                className="rounded-md border border-slate-200 bg-slate-50 p-4"
+                key={history.id}
+              >
+                <p className="text-sm text-slate-700">
+                  {history.fromStatus
+                    ? statusLabels[history.fromStatus]
+                    : "Criado"}{" "}
+                  → {statusLabels[history.toStatus]}
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  {history.changedBy.name} ·{" "}
+                  {formatDateTime(history.createdAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-slate-600">
+            Ainda não há histórico de status.
+          </p>
+        )}
       </section>
     </main>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm text-slate-800">{value}</dd>
+    </div>
   );
 }
