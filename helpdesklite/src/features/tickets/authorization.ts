@@ -2,6 +2,13 @@ import "server-only";
 
 import { Prisma, TicketStatus, UserRole } from "@/generated/prisma/client";
 import type { CurrentUser } from "@/server/auth/current-user";
+import {
+  canAssignTicketByRole,
+  canChangeTicketStatusByRole,
+  canCommentOnTicketByRole,
+  canCreateTicketByRole,
+  canTransitionTicketStatusByRole,
+} from "./authorization-rules";
 
 export function getTicketWhereForUser(
   user: CurrentUser,
@@ -22,7 +29,7 @@ export function canViewAllTickets(user: CurrentUser) {
 }
 
 export function canCreateTicket(user: CurrentUser) {
-  return user.role === UserRole.REQUESTER;
+  return canCreateTicketByRole(user);
 }
 
 export function canCommentOnTicket(
@@ -33,16 +40,7 @@ export function canCommentOnTicket(
     assigneeId: string | null;
   },
 ) {
-  const canView =
-    user.role === UserRole.ADMIN ||
-    ticket.requesterId === user.id ||
-    ticket.assigneeId === user.id;
-
-  if (!canView) {
-    return false;
-  }
-
-  return ticket.status !== TicketStatus.CLOSED || user.role === UserRole.ADMIN;
+  return canCommentOnTicketByRole(user, ticket);
 }
 
 export function canChangeTicketStatus(
@@ -51,23 +49,17 @@ export function canChangeTicketStatus(
     assigneeId: string | null;
   },
 ) {
-  return user.role === UserRole.ADMIN || ticket.assigneeId === user.id;
+  return canChangeTicketStatusByRole(user, ticket);
 }
 
 export function canAssignTicket(user: CurrentUser) {
-  return user.role === UserRole.ADMIN;
+  return canAssignTicketByRole(user);
 }
 
-export function canSetTicketStatus(user: CurrentUser, status: TicketStatus) {
-  if (user.role === UserRole.ADMIN) {
-    return true;
-  }
-
-  const technicianAllowedStatuses: TicketStatus[] = [
-    TicketStatus.IN_PROGRESS,
-    TicketStatus.WAITING_USER,
-    TicketStatus.RESOLVED,
-  ];
-
-  return technicianAllowedStatuses.includes(status);
+export function canTransitionTicketStatus(
+  user: CurrentUser,
+  currentStatus: TicketStatus,
+  nextStatus: TicketStatus,
+) {
+  return canTransitionTicketStatusByRole(user, currentStatus, nextStatus);
 }

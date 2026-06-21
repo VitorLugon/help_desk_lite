@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   canChangeTicketStatus,
-  canSetTicketStatus,
+  canTransitionTicketStatus,
 } from "@/features/tickets/authorization";
 import { updateTicketStatusSchema } from "@/features/tickets/schemas";
 import { getCurrentUser } from "@/server/auth/current-user";
@@ -41,7 +41,14 @@ export async function PATCH(request: Request, context: RouteContext) {
   const body = await request.json().catch(() => null);
   const parsedBody = updateTicketStatusSchema.safeParse(body);
 
-  if (!parsedBody.success || !canSetTicketStatus(currentUser, parsedBody.data.status)) {
+  if (
+    !parsedBody.success ||
+    !canTransitionTicketStatus(
+      currentUser,
+      ticket.status,
+      parsedBody.data.status,
+    )
+  ) {
     return NextResponse.json(
       { message: "Status inválido para o seu perfil." },
       { status: 400 },
@@ -58,8 +65,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       data: {
         status: parsedBody.data.status,
         resolvedAt:
-          parsedBody.data.status === "RESOLVED" ? new Date() : undefined,
-        closedAt: parsedBody.data.status === "CLOSED" ? new Date() : undefined,
+          parsedBody.data.status === "RESOLVED" ? new Date() : null,
+        closedAt: parsedBody.data.status === "CLOSED" ? new Date() : null,
       },
     }),
     prisma.ticketStatusHistory.create({
