@@ -30,6 +30,8 @@ O HelpDesk Lite demonstra a construção de uma aplicação web com papéis de u
 npm install
 cp .env.example .env
 npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
 ```
 
@@ -46,4 +48,4 @@ A aplicação fica disponível em `http://localhost:3000`.
 
 ## Estado atual
 
-Base inicial configurada com layout, página inicial, Prisma, Vitest e documentação. Autenticação, CRUD de chamados e dashboard ainda não foram implementados.
+Base inicial configurada com layout, página inicial, Prisma, Vitest, seed e autenticação simples. CRUD de chamados e dashboard operacional ainda não foram implementados.

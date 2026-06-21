@@ -19,6 +19,11 @@ Copie `.env.example` para `.env` e ajuste a URL do PostgreSQL:
 cp .env.example .env
 ```
 
+Variáveis necessárias:
+
+- `DATABASE_URL`: conexão com o PostgreSQL.
+- `AUTH_SECRET`: chave usada para assinar o cookie de sessão.
+
 ## Prisma
 
 Com o banco configurado, gere o client:
@@ -27,7 +32,12 @@ Com o banco configurado, gere o client:
 npx prisma generate
 ```
 
-As migrations serão criadas na próxima etapa do MVP, junto com o seed inicial.
+Para aplicar o schema e popular dados de demonstração:
+
+```bash
+npx prisma migrate dev
+npx prisma db seed
+```
 
 ## Testes
 

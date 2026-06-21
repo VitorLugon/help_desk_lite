@@ -15,6 +15,12 @@ export default function Home() {
               técnicos e administradores, construído com Next.js, TypeScript,
               Prisma e PostgreSQL.
             </p>
+            <a
+              className="mt-8 inline-flex h-11 items-center rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800"
+              href="/login"
+            >
+              Acessar sistema
+            </a>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
