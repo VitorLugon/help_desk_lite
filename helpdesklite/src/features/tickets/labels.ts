@@ -1,4 +1,4 @@
-import { TicketPriority, TicketStatus, UserRole } from "@/generated/prisma/client";
+import { TicketPriority, TicketStatus, UserRole } from "@/generated/prisma/enums";
 
 export const statusLabels: Record<TicketStatus, string> = {
   [TicketStatus.OPEN]: "Aberto",

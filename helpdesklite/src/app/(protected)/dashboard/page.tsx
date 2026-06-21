@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { UserRole } from "@/generated/prisma/client";
 import { requireCurrentUser } from "@/server/auth/current-user";
 import { roleLabels } from "@/features/tickets/labels";
 
@@ -19,6 +20,14 @@ export default async function DashboardPage() {
           Seu acesso está ativo como {roleLabel}. As próximas etapas do MVP vão
           adicionar listagem de chamados, usuários e indicadores.
         </p>
+        {currentUser.role === UserRole.REQUESTER ? (
+          <Link
+            className="mt-6 inline-flex h-11 items-center rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800"
+            href="/tickets/new"
+          >
+            Abrir chamado
+          </Link>
+        ) : null}
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">

@@ -20,3 +20,7 @@ export function getTicketWhereForUser(
 export function canViewAllTickets(user: CurrentUser) {
   return user.role === UserRole.ADMIN;
 }
+
+export function canCreateTicket(user: CurrentUser) {
+  return user.role === UserRole.REQUESTER;
+}

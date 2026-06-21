@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TicketPriority, TicketStatus } from "@/generated/prisma/client";
+import { TicketPriority, TicketStatus } from "@/generated/prisma/enums";
 
 const ticketStatusValues = [
   TicketStatus.OPEN,
