@@ -35,18 +35,18 @@ enum TicketPriority {
 }
 
 model User {
-  id                   String                @id @default(cuid())
-  name                 String
-  email                String                @unique
-  passwordHash         String
-  role                 UserRole              @default(REQUESTER)
-  status               UserStatus            @default(ACTIVE)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  requestedTickets     Ticket[]              @relation("TicketRequester")
-  assignedTickets      Ticket[]              @relation("TicketAssignee")
-  comments             TicketComment[]
-  statusChanges        TicketStatusHistory[]
+  id               String                @id @default(cuid())
+  name             String
+  email            String                @unique
+  passwordHash     String
+  role             UserRole              @default(REQUESTER)
+  status           UserStatus            @default(ACTIVE)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  requestedTickets Ticket[]              @relation("TicketRequester")
+  assignedTickets  Ticket[]              @relation("TicketAssignee")
+  comments         TicketComment[]
+  statusChanges    TicketStatusHistory[]
 }
 
 model Ticket {
@@ -71,6 +71,9 @@ model Ticket {
   @@index([assigneeId])
   @@index([status])
   @@index([priority])
+  @@index([category])
+  @@index([createdAt])
+  @@index([status, priority])
 }
 
 model TicketComment {
