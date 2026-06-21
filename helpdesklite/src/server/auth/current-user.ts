@@ -1,7 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { UserStatus } from "@/generated/prisma/client";
+import { UserRole, UserStatus } from "@/generated/prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { destroySession, readSession } from "./session";
 
@@ -9,8 +9,8 @@ export type CurrentUser = {
   id: string;
   name: string;
   email: string;
-  role: string;
-  status: string;
+  role: UserRole;
+  status: UserStatus;
 };
 
 const currentUserSelect = {

@@ -13,9 +13,19 @@ export default async function ProtectedLayout({
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-4 sm:px-8 lg:px-10">
-          <Link className="text-lg font-bold text-slate-950" href="/dashboard">
-            HelpDesk Lite
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link className="text-lg font-bold text-slate-950" href="/dashboard">
+              HelpDesk Lite
+            </Link>
+            <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 md:flex">
+              <Link className="transition hover:text-slate-950" href="/dashboard">
+                Dashboard
+              </Link>
+              <Link className="transition hover:text-slate-950" href="/tickets">
+                Chamados
+              </Link>
+            </nav>
+          </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden text-right sm:block">

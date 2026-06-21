@@ -1,15 +1,10 @@
+import Link from "next/link";
 import { requireCurrentUser } from "@/server/auth/current-user";
-
-const roleLabels = {
-  ADMIN: "Administrador",
-  TECHNICIAN: "Técnico",
-  REQUESTER: "Solicitante",
-} as const;
+import { roleLabels } from "@/features/tickets/labels";
 
 export default async function DashboardPage() {
   const currentUser = await requireCurrentUser();
-  const roleLabel =
-    roleLabels[currentUser.role as keyof typeof roleLabels] ?? currentUser.role;
+  const roleLabel = roleLabels[currentUser.role];
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8 lg:px-10">
@@ -27,32 +22,52 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        {[
+        {[ 
           {
             title: "Chamados",
-            description: "Listagem e filtros serão implementados na próxima fase.",
+            description:
+              "Consulte chamados com filtros por status e prioridade.",
+            href: "/tickets",
           },
           {
             title: "Usuários",
             description: "Gestão de usuários será restrita ao perfil admin.",
+            href: null,
           },
           {
             title: "Dashboard",
             description: "Indicadores operacionais entrarão após os chamados.",
+            href: null,
           },
-        ].map((item) => (
+        ].map((item) => {
+          const content = (
+            <>
+              <h2 className="text-base font-semibold text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {item.description}
+              </p>
+            </>
+          );
+
+          return item.href ? (
+            <Link
+              className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-cyan-200 hover:bg-cyan-50"
+              href={item.href}
+              key={item.title}
+            >
+              {content}
+            </Link>
+          ) : (
           <article
             className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
             key={item.title}
           >
-            <h2 className="text-base font-semibold text-slate-950">
-              {item.title}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              {item.description}
-            </p>
+            {content}
           </article>
-        ))}
+          );
+        })}
       </section>
     </main>
   );
