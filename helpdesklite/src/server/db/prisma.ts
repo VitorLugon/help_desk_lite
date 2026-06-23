@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
 
 function createPrismaClient() {
@@ -8,7 +8,7 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL não foi definida.");
   }
 
-  const adapter = new PrismaPg(databaseUrl);
+  const adapter = new PrismaNeon({ connectionString: databaseUrl });
 
   return new PrismaClient({
     adapter,

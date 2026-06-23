@@ -120,11 +120,13 @@ http://localhost:3000
 ## Variáveis de Ambiente
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/helpdesklite?schema=public"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+DATABASE_URL_UNPOOLED="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 AUTH_SECRET="troque-por-uma-chave-grande-e-aleatoria"
 ```
 
 - `DATABASE_URL`: string de conexão com o PostgreSQL.
+- `DATABASE_URL_UNPOOLED`: string de conexão direta, recomendada para migrations no Neon.
 - `AUTH_SECRET`: chave usada para assinar o cookie de sessão.
 
 ## Logins de Demonstração
@@ -184,11 +186,70 @@ Espaço reservado para imagens do projeto:
 
 ## Deploy
 
+O projeto está preparado para deploy na Vercel usando um PostgreSQL externo, como Neon, Supabase, Railway, Render ou outro provedor compatível.
+
 Link do deploy:
 
 ```txt
 Em breve
 ```
+
+### Variáveis na Vercel
+
+Cadastre em `Project Settings > Environment Variables`:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+DATABASE_URL_UNPOOLED="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+AUTH_SECRET="uma-chave-longa-aleatoria-e-segura"
+```
+
+Não use valores locais ou senhas reais no repositório. O arquivo `.env` deve permanecer apenas na máquina local.
+
+No Neon, use a URL pooled em `DATABASE_URL` para a aplicação e a URL sem pooler em `DATABASE_URL_UNPOOLED` para as migrations do Prisma.
+
+### Configuração de Build
+
+Na Vercel, mantenha os comandos padrão:
+
+- Install Command: `npm install`
+- Build Command: `npm run build`
+- Output Directory: padrão do Next.js
+
+O script `postinstall` executa `prisma generate` automaticamente após a instalação das dependências.
+
+### Migrations e Seed em Produção
+
+Após configurar `DATABASE_URL` e, se disponível, `DATABASE_URL_UNPOOLED` apontando para o banco externo, rode as migrations:
+
+```bash
+npm run db:migrate:deploy
+```
+
+Se quiser popular o ambiente com usuários e chamados de demonstração:
+
+```bash
+npm run db:seed
+```
+
+A seed é opcional. O projeto não depende de dados locais, mas precisa de usuários no banco para que seja possível fazer login.
+
+Importante: a seed atual recria os dados de demonstração. Use apenas em ambiente vazio ou demo.
+
+### Checklist de Produção
+
+- Criar banco PostgreSQL externo.
+- Copiar a connection string para `DATABASE_URL` na Vercel.
+- No Neon, copiar também a connection string sem pooler para `DATABASE_URL_UNPOOLED`.
+- Criar um `AUTH_SECRET` longo e aleatório.
+- Confirmar que `.env` não foi commitado.
+- Rodar `npm run lint`.
+- Rodar `npm run test`.
+- Rodar `npm run build`.
+- Executar `npm run db:migrate:deploy` contra o banco de produção.
+- Executar `npm run db:seed` somente se quiser logins de demonstração.
+- Fazer deploy na Vercel.
+- Testar login, dashboard, listagem, detalhe, comentários e mudança de status.
 
 ## Aprendizados Técnicos
 

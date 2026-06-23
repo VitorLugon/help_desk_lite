@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import bcrypt from "bcryptjs";
 import {
   PrismaClient,
@@ -8,13 +8,13 @@ import {
   UserStatus,
 } from "../src/generated/prisma/client.ts";
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL não foi definida.");
 }
 
-const adapter = new PrismaPg(databaseUrl);
+const adapter = new PrismaNeon({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
 const demoPassword = "Senha@123";
