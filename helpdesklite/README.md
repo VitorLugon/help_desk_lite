@@ -190,9 +190,7 @@ O projeto está preparado para deploy na Vercel usando um PostgreSQL externo, co
 
 Link do deploy:
 
-```txt
-Em breve
-```
+[Acessar o HelpDesk Lite](https://helpdesklite.vercel.app/)
 
 ### Variáveis na Vercel
 
@@ -272,4 +270,3 @@ Importante: a seed atual recria os dados de demonstração. Use apenas em ambien
 - Busca por título, categoria ou solicitante.
 - Upload de anexos.
 - Notificações por e-mail.
-- Deploy em produção.
